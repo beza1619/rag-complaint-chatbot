@@ -1,0 +1,4 @@
+"data/raw/" 
+"vector_store/" 
+"*.parquet" 
+"*.csv" 
