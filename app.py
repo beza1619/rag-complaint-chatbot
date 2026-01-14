@@ -1,138 +1,162 @@
+# app.py - Gradio interface for CrediTrust Complaint Analyzer
 import gradio as gr
-import pandas as pd
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+import sys
+import os
 
-print("Loading complaint analysis system...")
+# Add src folder to path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-# Load pre-processed complaint embeddings
 try:
-    sample_embeddings = pd.read_parquet('vector_store/sample_embeddings.parquet')
-    embeddings_array = np.stack(sample_embeddings['embedding'].values)
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    print("✅ System loaded successfully")
-except Exception as e:
-    print(f"❌ Error loading: {e}")
+    from rag_pipeline import RAGSystem
+    print("✅ RAG system imported successfully")
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    print("Make sure you have the required packages installed")
     raise
 
-def search_complaints(query, k=5):
-    """Search for similar complaint chunks"""
-    query_embedding = model.encode(query)
-    similarities = cosine_similarity([query_embedding], embeddings_array)[0]
-    top_indices = similarities.argsort()[-k:][::-1]
-    
-    results = []
-    for idx in top_indices:
-        results.append({
-            'text': sample_embeddings.iloc[idx]['text'],
-            'product': sample_embeddings.iloc[idx]['product'],
-            'similarity': float(similarities[idx]),
-            'chunk_index': int(sample_embeddings.iloc[idx]['chunk_index'])
-        })
-    return results
+# Initialize RAG system
+def initialize_system():
+    """Initialize the RAG system"""
+    try:
+        embeddings_path = 'vector_store/sample_embeddings.parquet'
+        if not os.path.exists(embeddings_path):
+            raise FileNotFoundError(f"Embeddings file not found: {embeddings_path}")
+        
+        rag = RAGSystem(embeddings_path)
+        print("✅ RAG system initialized")
+        return rag
+    except Exception as e:
+        print(f"❌ Failed to initialize RAG system: {e}")
+        raise
 
-def analyze_complaints(question):
-    """Analyze complaints and generate answer"""
-    # Search for relevant complaints
-    chunks = search_complaints(question, k=4)
-    
-    # Analyze patterns
-    products = {}
-    issues = []
-    
-    for chunk in chunks:
-        product = chunk['product']
-        products[product] = products.get(product, 0) + 1
+# Initialize
+rag_system = initialize_system()
+
+def analyze_complaint(question):
+    """Main function to analyze complaints"""
+    try:
+        # Validate input
+        if not question or len(question.strip()) < 3:
+            return "Please enter a valid question (at least 3 characters).", []
         
-        text_lower = chunk['text'].lower()
-        issue_categories = [
-            ('billing', ['billing', 'charge', 'fee', 'overcharge']),
-            ('access', ['access', 'login', 'password', 'locked']),
-            ('service', ['service', 'customer', 'representative', 'support']),
-            ('fraud', ['fraud', 'unauthorized', 'theft', 'scam']),
-            ('payment', ['payment', 'transaction', 'transfer', 'withdrawal'])
-        ]
+        print(f"Processing question: {question}")
         
-        for issue_name, keywords in issue_categories:
-            if any(keyword in text_lower for keyword in keywords):
-                if issue_name not in issues:
-                    issues.append(issue_name)
+        # Retrieve relevant chunks
+        chunks = rag_system.retrieve_chunks(question, k=5)
+        
+        if not chunks:
+            return "No relevant complaints found for your question. Try a different question.", []
+        
+        # Generate answer
+        answer, sources = rag_system.generate_answer(question, chunks)
+        
+        # Format sources for display
+        formatted_sources = []
+        for i, chunk in enumerate(chunks[:3]):  # Show top 3 sources
+            formatted_sources.append({
+                "rank": i + 1,
+                "product": chunk['product'],
+                "similarity": f"{chunk['similarity']:.3f}",
+                "text": chunk['text'][:200] + "..." if len(chunk['text']) > 200 else chunk['text']
+            })
+        
+        return answer, formatted_sources
     
-    # Build answer
-    answer_parts = [f"## Analysis of customer complaints for: '{question}'"]
-    answer_parts.append("---")
-    
-    if products:
-        answer_parts.append(f"**Found {len(chunks)} relevant complaint excerpts**")
-        answer_parts.append("**Product distribution:**")
-        for product, count in products.items():
-            answer_parts.append(f"- {product}: {count} complaints")
-    
-    if issues:
-        answer_parts.append(f"\n**Common issues:** {', '.join(issues)}")
-    
-    # Add source examples
-    answer_parts.append("\n**Top complaint excerpts:**")
-    for i, chunk in enumerate(chunks[:3]):
-        excerpt = chunk['text']
-        if len(excerpt) > 150:
-            excerpt = excerpt[:150] + "..."
-        answer_parts.append(f"{i+1}. ({chunk['product']}, similarity: {chunk['similarity']:.2f})")
-        answer_parts.append(f"   '{excerpt}'")
-    
-    return "\n".join(answer_parts), chunks
+    except Exception as e:
+        error_msg = f"Error processing question: {str(e)}"
+        print(error_msg)
+        return error_msg, []
 
 # Create Gradio interface
 with gr.Blocks(title="CrediTrust Complaint Analyzer", theme=gr.themes.Soft()) as demo:
     gr.Markdown("# 🏦 CrediTrust Financial Complaint Analyzer")
-    gr.Markdown("### AI-Powered Complaint Analysis for Financial Services")
-    gr.Markdown("Ask natural language questions about customer complaints across credit cards, loans, savings accounts, and money transfers.")
+    gr.Markdown("### AI-Powered Analysis of Customer Complaints")
+    gr.Markdown("Ask questions about complaints across Credit Cards, Personal Loans, Savings Accounts, and Money Transfers.")
     
     with gr.Row():
         with gr.Column(scale=2):
+            gr.Markdown("### 📝 Ask Your Question")
             question_input = gr.Textbox(
-                label="Ask a question about complaints",
-                placeholder="e.g., What are common credit card issues?",
-                lines=2
+                label="",
+                placeholder="Example: 'What are common credit card issues?' or 'Tell me about billing complaints'",
+                lines=3,
+                max_lines=3
             )
-            submit_btn = gr.Button("🔍 Analyze Complaints", variant="primary")
-            clear_btn = gr.Button("🔄 Clear")
+            
+            with gr.Row():
+                submit_btn = gr.Button("🔍 Analyze Complaints", variant="primary", size="lg")
+                clear_btn = gr.Button("🔄 Clear", size="lg")
         
         with gr.Column(scale=3):
-            answer_output = gr.Markdown(label="Analysis Results")
+            gr.Markdown("### 📊 Analysis Results")
+            answer_output = gr.Markdown(
+                label="",
+                value="*Your analysis will appear here...*"
+            )
             
-            with gr.Accordion("📄 View Source Complaints", open=False):
-                sources_output = gr.JSON(label="Retrieved Complaint Excerpts")
+            with gr.Accordion("📄 View Source Complaints (Click to Expand)", open=False):
+                sources_output = gr.JSON(
+                    label="Retrieved Complaint Excerpts",
+                    value=[]
+                )
     
-    def process_question(question):
-        answer, sources = analyze_complaints(question)
+    # Example questions
+    gr.Markdown("### 💡 Try These Example Questions:")
+    
+    examples = gr.Examples(
+        examples=[
+            ["What are common credit card issues?"],
+            ["Are there problems with savings accounts?"],
+            ["What billing complaints do customers have?"],
+            ["Tell me about customer service complaints"],
+            ["Are there any fraud-related complaints?"]
+        ],
+        inputs=question_input,
+        label="Click any example to try:"
+    )
+    
+    # Footer
+    gr.Markdown("---")
+    gr.Markdown(
+        """
+        **How it works:**
+        1. Enter your question about customer complaints
+        2. System finds similar complaint excerpts using semantic search
+        3. Analyzes patterns across products and issues
+        4. Provides evidence-based answer with source citations
+        
+        *Built for CrediTrust Financial's AI Innovation Challenge*
+        """
+    )
+    
+    # Button actions
+    def process_and_display(question):
+        answer, sources = analyze_complaint(question)
         return answer, sources
     
     submit_btn.click(
-        fn=process_question,
+        fn=process_and_display,
         inputs=question_input,
         outputs=[answer_output, sources_output]
     )
     
     def clear_all():
-        return "", None, None
+        return "", "*Your analysis will appear here...*", []
     
     clear_btn.click(
         fn=clear_all,
         outputs=[question_input, answer_output, sources_output]
     )
-    
-    gr.Markdown("### 💡 Try these example questions:")
-    examples = gr.Examples(
-        examples=[
-            ["What credit card problems do customers report?"],
-            ["Are there issues with savings accounts?"],
-            ["What billing complaints exist?"],
-            ["Find complaints about customer service"]
-        ],
-        inputs=question_input
-    )
 
+# Launch application
 if __name__ == "__main__":
-    demo.launch(share=False, server_port=7860)
+    print("🚀 Starting CrediTrust Complaint Analyzer...")
+    print("🌐 Opening web interface at http://localhost:7860")
+    print("⏳ Please wait a moment for the interface to load...")
+    
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False,
+        show_error=True
+    )

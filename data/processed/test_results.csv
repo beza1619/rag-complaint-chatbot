@@ -1,0 +1,95 @@
+question,answer,num_chunks,top_similarity
+What are common credit card issues?,"**Analysis of customer complaints for:** 'What are common credit card issues?'
+---
+**Found 4 relevant complaint excerpts**
+**Product distribution:**
+- Credit card: 4 complaints
+
+**Common issues:** service, payment, credit, loan, billing
+
+**Top complaint excerpts:**
+1. (Credit card, similarity: 0.49)
+   'S. Bank decide to XXXX an account that was never properly activated or usable due to their failures, is completely unjust and financially XXXX 
+This e...'
+2. (Credit card, similarity: 0.46)
+   'Synchrony bank holds the store credit card XXXX XXXX in which i am making a complaint. Without notice to the customer my credit availability was lower...'
+3. (Credit card, similarity: 0.45)
+   'count paying all fees, interest and principle without delay. I was paying the entire Total Balance as soon as a balance was shown, trying to resolve i...'",4,0.4854596257209778
+Are there problems with savings accounts?,"**Analysis of customer complaints for:** 'Are there problems with savings accounts?'
+---
+**Found 4 relevant complaint excerpts**
+**Product distribution:**
+- Credit card: 2 complaints
+- Checking or savings account: 2 complaints
+
+**Common issues:** billing, service, payment
+
+**Top complaint excerpts:**
+1. (Credit card, similarity: 0.39)
+   'been, given the lack of functionality ), I was advised that it could take an unacceptable XXXX XXXX XXXX XXXX ( XXXX and a half billing cycles ) to re...'
+2. (Credit card, similarity: 0.38)
+   'S. Bank decide to XXXX an account that was never properly activated or usable due to their failures, is completely unjust and financially XXXX 
+This e...'
+3. (Checking or savings account, similarity: 0.36)
+   'nd resolved within 90 days. We have waited over 12 months. 
+
+My mother is a vulnerable senior citizen, and I believe her financial safety has been neg...'",4,0.3888806700706482
+What billing complaints do customers have?,"**Analysis of customer complaints for:** 'What billing complaints do customers have?'
+---
+**Found 4 relevant complaint excerpts**
+**Product distribution:**
+- Payday loan, title loan, personal loan, or advance loan: 1 complaints
+- Credit card: 3 complaints
+
+**Common issues:** payment, billing, access, loan
+
+**Top complaint excerpts:**
+1. (Payday loan, title loan, personal loan, or advance loan, similarity: 0.50)
+   ' said she was going to file a complaint. 
+The last time I took a call from them it was the XXXX of the branch calling, I asked her could she give me a...'
+2. (Credit card, similarity: 0.48)
+   ' to accrue as long as I pay late, despite my efforts to pay the full balance and all charges each time they appeared.
+
+They kept me in a billing loop ...'
+3. (Credit card, similarity: 0.47)
+   'ploitative.
+
+Why Im filing this complaint : The app misrepresented Total Balance as a complete payoff, but allowed new charges immediately afterward a...'",4,0.49682003259658813
+Tell me about customer service complaints,"**Analysis of customer complaints for:** 'Tell me about customer service complaints'
+---
+**Found 4 relevant complaint excerpts**
+**Product distribution:**
+- Payday loan, title loan, personal loan, or advance loan: 2 complaints
+- Checking or savings account: 1 complaints
+- Credit card: 1 complaints
+
+**Common issues:** payment, fraud, service, credit
+
+**Top complaint excerpts:**
+1. (Payday loan, title loan, personal loan, or advance loan, similarity: 0.48)
+   ' said she was going to file a complaint. 
+The last time I took a call from them it was the XXXX of the branch calling, I asked her could she give me a...'
+2. (Checking or savings account, similarity: 0.44)
+   'ce that Truist offers. 
+
+I am writing this complaint requesting that this dispute process be governed for constructive fraud being caused by this majo...'
+3. (Credit card, similarity: 0.43)
+   'ment to them. I was now faced with the inconvenience & extra expenses to going around to look for another hotel. I later emailed XXXX about this & ask...'",4,0.4848182499408722
+Are there any fraud-related complaints?,"**Analysis of customer complaints for:** 'Are there any fraud-related complaints?'
+---
+**Found 4 relevant complaint excerpts**
+**Product distribution:**
+- Checking or savings account: 3 complaints
+- Credit card: 1 complaints
+
+**Common issues:** fraud, payment, credit, billing
+
+**Top complaint excerpts:**
+1. (Checking or savings account, similarity: 0.57)
+   'ce that Truist offers. 
+
+I am writing this complaint requesting that this dispute process be governed for constructive fraud being caused by this majo...'
+2. (Checking or savings account, similarity: 0.54)
+   'Subject : Urgent Complaint Regarding Wire Fraud and Wells Fargo 's Inadequate Response My wife and I were the victims of a serious case of banking fra...'
+3. (Credit card, similarity: 0.51)
+   'vestigate this fraud claim and is holding me liable for a charge I clearly did not authorize or benefit from. The card has not been activated or used ...'",4,0.5690561532974243
